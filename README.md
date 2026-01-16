@@ -1183,7 +1183,7 @@ Ce projet est **propriétaire** et développé pour **SCC** et **PGS**.
 </p>
 
 <p align="center">
-  <a href="https://github.com/ibrahim123959/AI-BANK-RECONCILIATION">🔗 GitHub Repository</a> •
+  <a href="https://github.com/ibrahim123959/AI-RECONCILIATION-BANKING-ENGINE-SENEGAL">🔗 GitHub Repository</a> •
   <a href="https://docs.example.com">📚 Documentation Complète</a> •
-  <a href="https://figma.com/prototype">🎨 Prototype UI</a>
+  <a href="https://bats-raft-03958782.figma.site/confidence-scoring">🎨 Prototype UI</a>
 </p>
