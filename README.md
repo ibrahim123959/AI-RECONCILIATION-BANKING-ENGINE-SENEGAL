@@ -23,7 +23,7 @@
 ---
 
 ## 🎯 Vue d'Ensemble
-
+```
 reconciliation-engine/
 │
 ├── README.md                              # Présentation, quick start, architecture overview
@@ -345,7 +345,7 @@ reconciliation-engine/
     │   └── feature_request.md
     │
     └── pull_request_template.md
-
+```
 ### Le Problème
 
 Dans les organisations comptables, la **réconciliation bancaire** (rapprochement entre relevés bancaires et écritures comptables) est un processus manuel chronophage et source d'erreurs :
@@ -634,110 +634,110 @@ TOTAL         : 25 → IGNORÉ ❌
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ PHASE 1 : INGESTION                                                 │
+│ PHASE 1 : INGESTION                                                  │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Utilisateur → Frontend : Upload 2 fichiers                          │
-│   • relevé_bancaire_nov.pdf (500 lignes)                            │
-│   • comptabilite_nov.xlsx (480 lignes)                              │
+│ Utilisateur → Frontend : Upload 2 fichiers                           │
+│   • relevé_bancaire_nov.pdf (500 lignes)                             │
+│   • comptabilite_nov.xlsx (480 lignes)                               │
 │                                                                      │
-│ Frontend → Backend : POST /api/v1/upload                            │
-│ Backend : Valide, sauvegarde, crée job                              │
+│ Frontend → Backend : POST /api/v1/upload                             │
+│ Backend : Valide, sauvegarde, crée job                               │
 └────────────────────────┬─────────────────────────────────────────────┘
                          │
                          ↓
 ┌──────────────────────────────────────────────────────────────────────┐
-│ PHASE 2 : EXTRACTION                                                │
+│ PHASE 2 : EXTRACTION                                                 │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Backend → Document Processor :                                      │
+│ Backend → Document Processor :                                       │
 │                                                                      │
-│ Fichier 1 (PDF) :                                                   │
-│   1. Détecte format : tableaux structurés                           │
-│   2. Camelot extrait → DataFrame pandas                             │
-│   3. Parse colonnes : Date, Description, Débit, Crédit, Solde      │
-│   4. Retourne : 500 transactions                                    │
-│   Temps : 2-3 secondes                                              │
+│ Fichier 1 (PDF) :                                                    │
+│   1. Détecte format : tableaux structurés                            │
+│   2. Camelot extrait → DataFrame pandas                              │
+│   3. Parse colonnes : Date, Description, Débit, Crédit, Solde        │
+│   4. Retourne : 500 transactions                                     │
+│   Temps : 2-3 secondes                                               │
 │                                                                      │
-│ Fichier 2 (Excel) :                                                 │
-│   1. Pandas read_excel()                                            │
-│   2. Identifie colonnes par mots-clés                               │
-│   3. Parse dates/montants                                           │
-│   4. Retourne : 480 transactions                                    │
-│   Temps : 1 seconde                                                 │
+│ Fichier 2 (Excel) :                                                  │
+│   1. Pandas read_excel()                                             │
+│   2. Identifie colonnes par mots-clés                                │
+│   3. Parse dates/montants                                            │
+│   4. Retourne : 480 transactions                                     │
+│   Temps : 1 seconde                                                  │
 │                                                                      │
-│ Backend → BDD : INSERT 980 transactions                             │
+│ Backend → BDD : INSERT 980 transactions                              │
 └────────────────────────┬─────────────────────────────────────────────┘
                          │
                          ↓
 ┌──────────────────────────────────────────────────────────────────────┐
-│ PHASE 3 : MATCHING (Cœur du système)                                │
+│ PHASE 3 : MATCHING (Cœur du système)                                 │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Backend → Matching Engine :                                         │
+│ Backend → Matching Engine :                                          │
 │                                                                      │
-│ Étape 1 : Indexation par montant                                    │
-│   • Crée buckets : {5000: [tx1, tx2], 150000: [tx3, tx4], ...}     │
-│   • Réduit comparaisons : 500×480 → ~15,000                         │
-│   Temps : 50ms                                                      │
+│ Étape 1 : Indexation par montant                                     │
+│   • Crée buckets : {5000: [tx1, tx2], 150000: [tx3, tx4], ...}       │
+│   • Réduit comparaisons : 500×480 → ~15,000                          │
+│   Temps : 50ms                                                       │
 │                                                                      │
-│ Étape 2 : Encoding batch (si IA nécessaire)                         │
-│   • Encode 500 libellés banque → embeddings (1.5s)                 │
-│   • Encode 480 libellés compta → embeddings (1.5s)                 │
-│   • Cache en mémoire                                                │
-│   Temps : 3 secondes                                                │
+│ Étape 2 : Encoding batch (si IA nécessaire)                          │
+│   • Encode 500 libellés banque → embeddings (1.5s)                   │
+│   • Encode 480 libellés compta → embeddings (1.5s)                   │
+│   • Cache en mémoire                                                 │
+│   Temps : 3 secondes                                                 │
 │                                                                      │
-│ Étape 3 : Matching couche par couche                                │
-│   Pour chaque transaction banque :                                  │
-│     1. Cherche candidats (même bucket montant)                      │
-│     2. Calcule scores (Couche 1 : règles)                           │
-│     3. Si échec → Couche 2 (IA)                                     │
-│     4. Si échec → Couche 3 (suggéré)                                │
-│   Temps : 8-12 secondes (500 transactions)                          │
+│ Étape 3 : Matching couche par couche                                 │
+│   Pour chaque transaction banque :                                   │
+│     1. Cherche candidats (même bucket montant)                       │
+│     2. Calcule scores (Couche 1 : règles)                            │
+│     3. Si échec → Couche 2 (IA)                                      │
+│     4. Si échec → Couche 3 (suggéré)                                 │
+│   Temps : 8-12 secondes (500 transactions)                           │
 │                                                                      │
 │ Résultats :                                                          │
-│   • Matches automatiques : 425 (85%)                                │
-│   • Matches suggérés : 50 (10%)                                     │
-│   • Non matchés : 25 (5%)                                           │
+│   • Matches automatiques : 425 (85%)                                 │
+│   • Matches suggérés : 50 (10%)                                      │
+│   • Non matchés : 25 (5%)                                            │
 │                                                                      │
-│ Backend → BDD : INSERT 475 matches                                  │
+│ Backend → BDD : INSERT 475 matches                                   │
 └────────────────────────┬─────────────────────────────────────────────┘
                          │
                          ↓
 ┌──────────────────────────────────────────────────────────────────────┐
-│ PHASE 4 : VALIDATION HUMAINE                                        │
+│ PHASE 4 : VALIDATION HUMAINE                                         │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Frontend : Affiche dashboard                                        │
-│   • Matches auto (425) : validés par défaut                         │
-│   • Matches suggérés (50) : queue validation                        │
-│   • Non matchés (25) : alerte comptable                             │
+│ Frontend : Affiche dashboard                                         │
+│   • Matches auto (425) : validés par défaut                          │
+│   • Matches suggérés (50) : queue validation                         │
+│   • Non matchés (25) : alerte comptable                              │
 │                                                                      │
-│ Utilisateur : Révise les 50 suggérés                                │
-│   • Valide 42 matches (84%)                                         │
-│   • Rejette 8 (faux positifs)                                       │
-│   Temps : 10-15 minutes                                             │
+│ Utilisateur : Révise les 50 suggérés                                 │
+│   • Valide 42 matches (84%)                                          │
+│   • Rejette 8 (faux positifs)                                        │
+│   Temps : 10-15 minutes                                              │
 │                                                                      │
-│ Utilisateur : Traite 25 non-matchés manuellement                    │
-│   Temps : 20-30 minutes                                             │
+│ Utilisateur : Traite 25 non-matchés manuellement                     │
+│   Temps : 20-30 minutes                                              │
 │                                                                      │
-│ Frontend → Backend : POST /api/v1/validation/{match_id}             │
-│ Backend → BDD : UPDATE matches SET validated=true                   │
-│ Backend → Learning Events : Enregistre corrections                  │
+│ Frontend → Backend : POST /api/v1/validation/{match_id}              │
+│ Backend → BDD : UPDATE matches SET validated=true                    │
+│ Backend → Learning Events : Enregistre corrections                   │
 └────────────────────────┬─────────────────────────────────────────────┘
                          │
                          ↓
 ┌──────────────────────────────────────────────────────────────────────┐
-│ PHASE 5 : EXPORT                                                    │
+│ PHASE 5 : EXPORT                                                     │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Utilisateur : Click "Exporter rapport"                              │
-│ Frontend → Backend : POST /api/v1/export/report                     │
+│ Utilisateur : Click "Exporter rapport"                               │
+│ Frontend → Backend : POST /api/v1/export/report                      │
 │                                                                      │
 │ Backend génère :                                                     │
-│   • Rapport Excel : matches validés, écarts, statistiques           │
-│   • Export Sage FEC : écritures comptables                          │
-│   • Logs audit : traçabilité complète                               │
+│   • Rapport Excel : matches validés, écarts, statistiques            │
+│   • Export Sage FEC : écritures comptables                           │
+│   • Logs audit : traçabilité complète                                │
 │                                                                      │
-│ Backend → Storage : Sauvegarde fichiers                             │
-│ Backend → Frontend : URLs téléchargement                            │
+│ Backend → Storage : Sauvegarde fichiers                              │
+│ Backend → Frontend : URLs téléchargement                             │
 │                                                                      │
-│ Utilisateur : Télécharge et importe dans Sage                       │
+│ Utilisateur : Télécharge et importe dans Sage                        │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
