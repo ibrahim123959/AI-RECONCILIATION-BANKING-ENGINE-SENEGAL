@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: reconciliation-db
+    environment:
+      POSTGRES_USER: reconciliation
+      POSTGRES_PASSWORD: dev_password_change_in_prod
+      POSTGRES_DB: reconciliation_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reconciliation"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: reconciliation-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: reconciliation-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://reconciliation:dev_password_change_in_prod@postgres:5432/reconciliation_dev
+      - REDIS_URL=redis://redis:6379
+      - ML_ENGINE_URL=http://ml-engine:8001
+      - ENVIRONMENT=development
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ML Engine
+  ml-engine:
+    build:
+      context: ./ml-engine
+      dockerfile: Dockerfile
+    container_name: reconciliation-ml
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=development
+    volumes:
+      - ./ml-engine:/app
+      - ml_cache:/app/data/embeddings_cache
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: uvicorn server.main:app --host 0.0.0.0 --port 8001 --reload
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: reconciliation-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host
+
+volumes:
+  postgres_data:
+  redis_data:
+  ml_cache:
+
+networks:
+  default:
+    name: reconciliation-network
+```

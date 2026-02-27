@@ -1,0 +1,102 @@
+# GitHub Configuration
+
+Ce dossier contient la configuration GitHub pour CI/CD et templates.
+
+## Structure
+```
+.github/
+├── workflows/              # GitHub Actions CI/CD
+│   ├── backend-ci.yml      # Tests backend automatiques
+│   ├── frontend-ci.yml     # Tests frontend automatiques
+│   ├── ml-engine-ci.yml    # Tests ML automatiques
+│   └── deploy-staging.yml  # Déploiement staging
+│
+├── ISSUE_TEMPLATE/         # Templates issues
+│   ├── bug_report.md       # Template bug report
+│   └── feature_request.md  # Template feature request
+│
+└── pull_request_template.md # Template PR
+```
+
+## Workflows CI/CD
+
+### Backend CI
+**Trigger :** Push sur `develop`, `main` ou PR vers ces branches  
+**Actions :**
+- Setup Python 3.11
+- Install dependencies
+- Run pytest avec coverage
+- Upload coverage à Codecov
+- Lint avec flake8
+
+### Frontend CI
+**Trigger :** Push sur `develop`, `main` ou PR  
+**Actions :**
+- Setup Node.js 18
+- Install dependencies
+- Run tests unitaires
+- Run linting (ESLint)
+
+### ML Engine CI
+**Trigger :** Push modifiant `ml-engine/`  
+**Actions :**
+- Setup Python 3.11
+- Install ML dependencies
+- Run tests ML
+- Run benchmarks performance
+
+### Deploy Staging
+**Trigger :** Merge dans `develop`  
+**Actions :**
+- Run tous les tests
+- Deploy vers Render staging
+- Run smoke tests
+- Notify sur Slack
+
+## Templates
+
+### Bug Report
+Utilisé pour signaler bugs. Inclut :
+- Description bug
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment (OS, browser, version)
+- Screenshots
+
+### Feature Request
+Utilisé pour proposer features. Inclut :
+- Description feature
+- Use case
+- Proposed solution
+- Alternatives considered
+
+### Pull Request
+Template auto pour toutes PRs. Inclut :
+- Description changements
+- Type (feature/fix/docs/refactor)
+- Tests ajoutés
+- Checklist review
+
+## Configuration Secrets
+
+Secrets requis (configurés dans Settings → Secrets) :
+
+| Secret | Usage |
+|--------|-------|
+| `RENDER_DEPLOY_HOOK` | URL webhook Render deploy |
+| `CODECOV_TOKEN` | Token upload coverage |
+| `SLACK_WEBHOOK` | Notifications Slack |
+
+## Branch Protection
+
+### `main` (Production)
+- ✅ Require PR reviews (2 approvals)
+- ✅ Require status checks (CI passing)
+- ✅ Require up-to-date branches
+- ✅ No force push
+- ✅ No deletion
+
+### `develop` (Integration)
+- ✅ Require PR reviews (1 approval)
+- ✅ Require status checks
+- ✅ No force push

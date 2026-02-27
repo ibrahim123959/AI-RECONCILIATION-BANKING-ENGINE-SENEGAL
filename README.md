@@ -21,8 +21,46 @@
 8. [Roadmap](#-roadmap)
 
 ---
-
 ## 🎯 Vue d'Ensemble
+- **Prototype Figma : <a href="https://bats-raft-03958782.figma.site/confidence-scoring">🎨 Prototype UI</a>
+
+### Le Problème
+
+Dans les organisations comptables, la **réconciliation bancaire** (rapprochement entre relevés bancaires et écritures comptables) est un processus manuel chronophage et source d'erreurs :
+
+- **500 transactions/mois** = 15-20 heures de travail manuel
+- **Taux d'erreur** : 5-8% (doublons, montants incorrects, dates décalées)
+- **Libellés incohérents** : "VIR SALAIRE JANVIER DIOP" (banque) vs "Paiement salaire M. Diop" (compta)
+
+```
+┌─────────────────────┐         ┌─────────────────────┐
+│  RELEVÉ BANCAIRE    │    VS   │  COMPTABILITÉ       │
+├─────────────────────┤         ├─────────────────────┤
+│ 15/11 VIR SALAIRE   │   ≟     │ 17/11 Paiement      │
+│ DIOP 150000 XOF     │         │ salaire M. Diop     │
+└─────────────────────┘         └─────────────────────┘
+         ❓ MÊME TRANSACTION ? ❓
+```
+
+### La Solution
+
+**Moteur de matching hybride** (Règles + IA) qui :
+
+✅ **Compare intelligemment** : montants, dates, descriptions  
+✅ **Comprend les synonymes** : "Virement" = "Transfert" = "Paiement"  
+✅ **Gère les décalages** : dates ±5j, montants ±5% (frais bancaires)  
+✅ **Détecte les cas spéciaux** : transactions splitées, mobile money, frais  
+✅ **S'améliore en continu** : apprentissage supervisé sur validations humaines
+
+### Résultats
+
+| Métrique | Manuel | Automatisé | Gain |
+|----------|--------|------------|------|
+| **Temps/transaction** | 2-3 min | 5-10 sec | **-95%** |
+| **Taux de matching** | N/A | 85%+ | - |
+| **Précision** | 92-95% | 96-98% | **+3%** |
+| **Révision manuelle** | 100% | 15% | **-85%** |
+
 ```
 reconciliation-engine/
 │
@@ -346,48 +384,12 @@ reconciliation-engine/
     │
     └── pull_request_template.md
 ```
-### Le Problème
 
-Dans les organisations comptables, la **réconciliation bancaire** (rapprochement entre relevés bancaires et écritures comptables) est un processus manuel chronophage et source d'erreurs :
-
-- **500 transactions/mois** = 15-20 heures de travail manuel
-- **Taux d'erreur** : 5-8% (doublons, montants incorrects, dates décalées)
-- **Libellés incohérents** : "VIR SALAIRE JANVIER DIOP" (banque) vs "Paiement salaire M. Diop" (compta)
-
-```
-┌─────────────────────┐         ┌─────────────────────┐
-│  RELEVÉ BANCAIRE    │    VS   │  COMPTABILITÉ       │
-├─────────────────────┤         ├─────────────────────┤
-│ 15/11 VIR SALAIRE   │   ≟     │ 17/11 Paiement      │
-│ DIOP 150000 XOF     │         │ salaire M. Diop     │
-└─────────────────────┘         └─────────────────────┘
-         ❓ MÊME TRANSACTION ? ❓
-```
-
-### La Solution
-
-**Moteur de matching hybride** (Règles + IA) qui :
-
-✅ **Compare intelligemment** : montants, dates, descriptions  
-✅ **Comprend les synonymes** : "Virement" = "Transfert" = "Paiement"  
-✅ **Gère les décalages** : dates ±5j, montants ±5% (frais bancaires)  
-✅ **Détecte les cas spéciaux** : transactions splitées, mobile money, frais  
-✅ **S'améliore en continu** : apprentissage supervisé sur validations humaines
-
-### Résultats
-
-| Métrique | Manuel | Automatisé | Gain |
-|----------|--------|------------|------|
-| **Temps/transaction** | 2-3 min | 5-10 sec | **-95%** |
-| **Taux de matching** | N/A | 85%+ | - |
-| **Précision** | 92-95% | 96-98% | **+3%** |
-| **Révision manuelle** | 100% | 15% | **-85%** |
 
 ---
 
 ## 🏗️ Architecture Système
 
-### Vue Globale
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
